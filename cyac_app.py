@@ -5,49 +5,68 @@ st.set_page_config(page_title="CYAC Analysis", layout="wide")
 
 st.title("CYAC Data Analysis Dashboard")
 
-# Upload CSV
 uploaded_file = st.file_uploader("Upload your cleaned CSV file", type=["csv"])
 
 if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
+    # --- Read CSV safely ---
+    df = pd.read_csv(uploaded_file, encoding="utf-8", low_memory=False)
 
-    # Clean column names
+    # --- Clean column names ---
     df.columns = df.columns.str.strip()
 
-    st.subheader("Raw Data")
-    st.dataframe(df)
+    # Remove unnamed columns
+    df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
 
-    # Convert date columns
-    if 'Date of contact' in df.columns:
-        df['Date of contact'] = pd.to_datetime(df['Date of contact'], errors='coerce')
+    # --- Normalize column names (just in case) ---
+    rename_map = {
+        "Client Information": "Client ID",
+        "Case Note Information": "Case ID"
+    }
+    df = df.rename(columns=rename_map)
 
-    if 'Next Contact Date' in df.columns:
-        df['Next Contact Date'] = pd.to_datetime(df['Next Contact Date'], errors='coerce')
+    # --- Check required columns ---
+    required_cols = [
+        "Client ID", "Case ID", "Case Note Type",
+        "Date of contact", "Time of contact",
+        "Location of contact", "Month", "Day", "Time Bucket"
+    ]
 
-    # Metrics
-    col1, col2 = st.columns(2)
+    missing = [col for col in required_cols if col not in df.columns]
 
-    with col1:
-        st.metric("Total Cases", df['Case ID'].nunique())
+    if missing:
+        st.error(f"Missing columns: {missing}")
+    else:
+        st.success("File loaded successfully!")
 
-    with col2:
-        st.metric("Total Records", len(df))
+        st.subheader("Preview Data")
+        st.dataframe(df.head(20))
 
-    # Case Type Chart
-    if 'Case Note Type' in df.columns:
-        st.subheader("Case Type Distribution")
-        st.bar_chart(df['Case Note Type'].value_counts())
+        # --- Metrics ---
+        col1, col2, col3 = st.columns(3)
 
-    # Location Chart
-    if 'Location of contact' in df.columns:
+        with col1:
+            st.metric("Total Cases", df["Case ID"].nunique())
+
+        with col2:
+            st.metric("Total Clients", df["Client ID"].nunique())
+
+        with col3:
+            st.metric("Total Records", len(df))
+
+        st.markdown("---")
+
+        # --- Charts ---
+        st.subheader("Case Note Type Distribution")
+        st.bar_chart(df["Case Note Type"].value_counts())
+
+        st.subheader("Monthly Trend")
+        if "Month" in df.columns:
+            st.bar_chart(df["Month"].value_counts())
+
+        st.subheader("Time Bucket Distribution")
+        if "Time Bucket" in df.columns:
+            st.bar_chart(df["Time Bucket"].value_counts())
+
         st.subheader("Location Distribution")
-        st.bar_chart(df['Location of contact'].value_counts())
-
-    # Time Trend
-    if 'Date of contact' in df.columns:
-        st.subheader("Contacts Over Time")
-        trend = df.groupby('Date of contact').size()
-        st.line_chart(trend)
-
-else:
-    st.info("Please upload a CSV file to begin analysis.")
+        if "Location of contact" in df.columns:
+            st.bar_chart(df["Location of contact"].value_counts())

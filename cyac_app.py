@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-st.set_page_config(page_title=‘CAC Analytics Dashboard’, layout=‘wide’, page_icon=‘CAC’)
+st.set_page_config(page_title='CAC Analytics Dashboard', layout='wide', page_icon='CAC')
 
 @st.cache_data
 def load_data():

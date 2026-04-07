@@ -1,19 +1,48 @@
 # CYAC Data Analysis Dashboard
 
-This project is a Streamlit dashboard for analyzing CYAC data.
+This project analyzes CYAC case data using Streamlit.
 
 ## Features
-- Upload CSV file securely
-- View raw dataset
-- Total cases and records
-- Case type distribution
-- Location analysis
-- Contact trends over time
+- Upload CSV file
+- Clean and preview data
+- Metrics:
+  - Total Cases
+  - Total Clients
+  - Total Records
+- Visualizations:
+  - Case Note Type
+  - Monthly Trends
+  - Time Bucket Analysis
+  - Location Distribution
 
-## How to Run
+## Required Columns in CSV
 
-pip install -r cyac_requirements.txt  
-streamlit run cyac_app.py  
+Client ID  
+Case ID  
+Case Note Type  
+Date of contact  
+Time of contact  
+Location of contact  
+Month  
+Day  
+Time Bucket  
 
-## Important
-This project uses anonymized data (PT_ID). No personal or sensitive data is stored in this repository.
+## How to Use
+
+1. Clean your Excel data
+2. Export as:
+   CSV UTF-8 (Comma delimited)
+3. Upload file in app
+
+## Notes
+
+- Remove extra header rows
+- Remove "Unnamed" columns
+- Ensure column names are correct
+- No personal/sensitive data
+
+## Tech Stack
+
+- Python
+- Pandas
+- Streamlit
